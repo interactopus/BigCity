@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="icon" type="image/png" href="favicon-32x32.png" sizes="32x32" />
+  <link rel="icon" type="image/png" href="favicon-16x16.png" sizes="16x16" />
+
+  <title>BigCity | type.today</title>
+  <!-- <meta name="description" content="Menoe Grotesque is a monospaced sans serif typeface made by Adam Katyi."> -->
+
+  <style>
+    body,
+    html {
+      padding: 0;
+      margin: 0;
+    }
+
+    video {
+      filter: grayscale() contrast(300%) brightness(100%);
+      /*background-color: red;*/
+    }
+
+    a svg{
+      -moz-transition: fill .2s ease-in;
+      -o-transition: fill .2s ease-in;
+      -webkit-transition: fill .2s ease-in;
+      transition: fill .2s ease-in;
+    }
+
+    #live {
+      /*top: 150px;*/
+      position: fixed;
+      left: 0;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      display: inline-block;
+      background-color: black;
+    }
+
+    #live::before {
+      background-color: rgb(33, 18, 57);
+      z-index: 1000;
+      content: " ";
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      /*opacity: 0.5;*/
+      pointer-events: none;
+      mix-blend-mode: multiply;
+    }
+
+    .city-title {
+      position: fixed;
+      /*top: 50%;*/
+      left: 0;
+      right: 0;
+      text-align: center;
+      line-height: 100vh;
+      margin-top: -10px;
+      z-index: 1001;
+      font-size: 6vw;
+      /*font-family: 'BigCity Grotesque Pro';*/
+      color: crimson;
+      cursor: default;
+      pointer-events: none;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -khtml-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      -o-user-select: none;
+      user-select: none;
+    }
+
+    .city-title svg {
+      transform: scale(12);
+      fill: crimson;
+    }
+
+    #oscilloscope {
+      position: fixed;
+      /*bottom: 0;*/
+      left: 0;
+      /*z-index: 1001;*/
+      mix-blend-mode: exclusion;
+      /*width: 170vw;
+      height: 40vh;*/
+      pointer-events: none;
+    }
+
+    #prevButton {
+      left: 0;
+    }
+
+    #nextButton {
+      right: 0;
+    }
+
+    .bigButton {
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      width: 50%;
+      z-index: 1002;
+    }
+
+    .about-window {
+      z-index: 1010;
+      /*background-color: red;*/
+      background-color: rgba(0, 0, 0, 0.8);
+      position: fixed;
+      padding: 80pt;
+      /*padding-bottom: 60pt;*/
+      margin-left: -200pt;
+      margin-top: -170pt;
+      top: 50%;
+      left: 50%;
+      width: 240pt;
+      transition: all .5s ease-in-out;
+    }
+
+    .about-window.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .about-window svg,
+    .about-window .about-window-links a svg {
+      fill: crimson;
+      height: 100%;
+    }
+
+    .about-window .about-window-links a:hover svg {
+      fill: white;
+    }
+
+    .close-button {
+      height: 22pt;
+      display: block;
+      position: absolute;
+      top: 20pt;
+      right: 20pt;
+    }
+
+    a.close-button:hover svg {
+      fill: white;
+    }
+
+    #interactopus-logo {
+      height: 50pt;
+      padding-bottom: 30pt;
+      display: inline-block;
+    }
+
+    #about-window-title {
+      margin-top: 30pt;
+      margin-bottom: 30pt;
+      height: 30pt;
+    }
+
+    .about-window-links {
+      /*margin-left: 90pt;*/
+      display: block;
+    }
+
+    .about-window-links a {
+      display: block;
+      height: 24pt;
+      margin-bottom: 3pt;
+    }
+
+    #show-about-button {
+      height: 40pt;
+      position: fixed;
+      bottom: 10pt;
+      right: 10pt;
+      z-index: 1010;
+      display: inline-block;
+      /*padding: 10pt;*/
+    }
+
+    #show-about-button svg {
+      fill: crimson;
+      height: 100%;
+    }
+
+    a#show-about-button:hover svg {
+      fill: white;
+    }
+
+    #live-icon {
+      height: 13pt;
+      position: fixed;
+      bottom: 10pt;
+      left: 10pt;
+      z-index: 1010;
+      display: inline-block;
+      padding: 10pt;
+    }
+
+    #live-icon svg {
+      fill: crimson;
+      height: 100%;
+    }
+
+    #typetoday-logo {
+      width: 40pt;
+      height: 34pt;
+      position: fixed;
+      bottom: 10pt;
+      left: 50%;
+      margin-left: -20pt;
+      z-index: 1010;
+      padding: 10pt;
+    }
+
+    #typetoday-logo {
+      width: 50pt;
+      position: fixed;
+      top: 10pt;
+      left: 50%;
+      margin-left: -25pt;
+      z-index: 1010;
+      padding: 10pt;
+    }
+
+    a#typetoday-logo:hover svg {
+      fill: crimson;
+    }
+
+    #typetoday-logo svg {
+      fill: white;
+      width: 100%;
+    }
+
+    #randomize-button {
+      width: 40pt;
+      position: fixed;
+      bottom: 10pt;
+      left: 50%;
+      margin-left: -20pt;
+      z-index: 1010;
+      /*padding: 10pt;*/
+    }
+
+    a#randomize-button:hover svg {
+      fill: white;
+    }
+
+    #randomize-button svg {
+      fill: crimson;
+      width: 100%;
+    }
+    /*PACE JS*/
+
+    body.pace-done .hidden-at-start {
+      /*display: inherit;*/
+      opacity: 1;
+      -webkit-transition: opacity 1s ease-in-out;
+      -moz-transition: opacity 1s ease-in-out;
+      -ms-transition: opacity 1s ease-in-out;
+      -o-transition: opacity 1s ease-in-out;
+      transition: opacity 1s ease-in-out;
+      pointer-events: auto;
+    }
+
+    .pace {
+      -webkit-pointer-events: none;
+      pointer-events: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      user-select: none;
+      z-index: 2000;
+      position: fixed;
+      margin: auto;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 50px;
+      width: 200px;
+      background: #fff;
+      border: 1px solid white;
+      overflow: hidden;
+    }
+
+    .pace .pace-progress {
+      -webkit-box-sizing: border-box;
+      -moz-box-sizing: border-box;
+      -ms-box-sizing: border-box;
+      -o-box-sizing: border-box;
+      box-sizing: border-box;
+      -webkit-transform: translate3d(0, 0, 0);
+      -moz-transform: translate3d(0, 0, 0);
+      -ms-transform: translate3d(0, 0, 0);
+      -o-transform: translate3d(0, 0, 0);
+      transform: translate3d(0, 0, 0);
+      max-width: 200px;
+      position: fixed;
+      z-index: 2000;
+      display: block;
+      position: absolute;
+      top: 0;
+      right: 100%;
+      height: 100%;
+      width: 100%;
+      background: black;
+    }
+
+    .pace.pace-inactive {
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+
+  <a id="typetoday-logo" href="https://type.today/ru/bigcity" target="_blank"></a>
+  <a id="show-about-button"></a>
+  <a id="randomize-button"></a>
+  <div id="live-icon"></div>
+
+  <div id="about-window" class="about-window hidden">
+    <a id="close-about-button" class="close-button"></a>
+    <div id="about-window-title"></div>
+    <div class="about-window-links">
+      <a id="alex-link" href="https://www.facebook.com/nobodyroo"></a>
+      <a id="dmitry-link" href="https://www.facebook.com/dmitry.ulmermorozov"></a>
+      <a id="maria-link" href="https://www.facebook.com/mmmirzametova"></a>
+      <a id="vadim-link" href="https://www.facebook.com/mirumirg"></a>
+    </div>
+  </div>
+
+  <!-- <div id="prevButton" class="bigButton"></div>
+  <div id="nextButton" class="bigButton"></div> -->
+  <div id="city-title" class="city-title"></div>
+
+  <div id="live"></div>
+
+  <canvas id="oscilloscope" width="1200" height="600"></canvas>
+  <script type="text/javascript" data-pace-options='{ "ajax": false, "eventLag": false }' src="./pace.min.js"></script>
+</body>
+
+</html>
