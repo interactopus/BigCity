@@ -16,13 +16,16 @@ let svgDataDict = require('./assets/textGraphicDict.json');
 export default class AppComponent {
   private canvas: HTMLCanvasElement;
   private canvasCtx: CanvasRenderingContext2D;
+  private audioElement: HTMLAudioElement;
+
   private audioCtx: AudioContext;
   private analyser: AnalyserNode;
   private bufferLength: number;
   private dataArray: Uint8Array;
 
-  private statLength: number = 128;
+  private statLength: number = 1;
   private audioFreqMaxValue = 256;
+  private fontUpdateInterval = 33;
 
   private stats: number[][];
 
@@ -46,6 +49,7 @@ export default class AppComponent {
 
   init = (): void => {
     this.cityTitle = document.getElementById("city-title");
+    this.audioElement = document.getElementById("audio-player") as HTMLAudioElement;
     this.canvas = document.getElementById("oscilloscope") as HTMLCanvasElement;
     this.canvasCtx = this.canvas.getContext("2d");
     this.aboutWindow = document.getElementById("about-window");
@@ -68,6 +72,8 @@ export default class AppComponent {
       position: 'top-right',
       // watermarkLink: "//www.skylinewebcams.com/"
     });
+
+    this.player.mute();
 
     this.updateSize();
     this.randomizeChannel();
@@ -120,7 +126,7 @@ export default class AppComponent {
     };
 
     window.addEventListener('resize', this.updateSize, true);
-    setInterval(this.updateFont, 200);
+    // setInterval(this.updateFont, this.fontUpdateInterval);
   }
 
   updateSize = (): void => {
@@ -137,7 +143,7 @@ export default class AppComponent {
 
     this.player.resize({ height: player_height, width: player_width })
 
-    this.canvas.width = 1.8 * window.innerWidth;
+    this.canvas.width = 1.0 * window.innerWidth;
     this.canvas.height = actualVideoHeight / 4;
 
     let bottomPos = Math.round((player_height - actualVideoHeight) / 2);
@@ -154,43 +160,37 @@ export default class AppComponent {
     let wind = window as any;
     this.audioCtx = new (wind.AudioContext || wind.webkitAudioContext || wind.mozAudioContext || wind.msAudioContext)();
 
-    var videoElement = document.getElementsByTagName("video")[0];
     this.analyser = this.audioCtx.createAnalyser();
     this.analyser.smoothingTimeConstant = 0.8;
 
-    var source = this.audioCtx.createMediaElementSource(videoElement);
+    var source = this.audioCtx.createMediaElementSource(this.audioElement);
     source.connect(this.analyser);
     this.analyser.connect(this.audioCtx.destination);
 
-    this.analyser.fftSize = 2048;
+    this.analyser.fftSize = 512;
     this.bufferLength = this.analyser.frequencyBinCount;
     this.dataArray = new Uint8Array(this.bufferLength);
     this.analyser.getByteTimeDomainData(this.dataArray);
   }
 
   channels: Channel[] = [
-    new Channel("Cleveland", "https://video3.earthcam.com/fecnetwork/8939.flv/playlist.m3u8"),
-    new Channel("Chicago", "https://video3.earthcam.com/fecnetwork/5187.flv/playlist.m3u8"),
-    new Channel("Dublin", "https://video3.earthcam.com/fecnetwork/4054.flv/playlist.m3u8"),
-    new Channel("New York", "https://video3.earthcam.com/fecnetwork/4017timessquare.flv/playlist.m3u8"),
-    new Channel("Austin", "https://video3.earthcam.com/fecnetwork/paradiseon6.flv/playlist.m3u8"),
-    new Channel("Doha", "https://video3.earthcam.com/fecnetwork/7947.flv/playlist.m3u8"),
-    new Channel("Las Vegas", "https://video3.earthcam.com/fecnetwork/eclasvegas.flv/playlist.m3u8"),
-    new Channel("Columbus", "https://video3.earthcam.com/fecnetwork/6427.flv/playlist.m3u8"),
-    new Channel("Belmont", "https://video3.earthcam.com/fecnetwork/5324.flv/playlist.m3u8"),
-    new Channel("San Francisco", "https://video3.earthcam.com/fecnetwork/6961.flv/playlist.m3u8"),
+    // new Channel("Cleveland", "https://video3.earthcam.com/fecnetwork/8939.flv/playlist.m3u8"),
+    // new Channel("Chicago", "https://video3.earthcam.com/fecnetwork/5187.flv/playlist.m3u8"),
+    // new Channel("Dublin", "https://video3.earthcam.com/fecnetwork/4054.flv/playlist.m3u8"),
+    new Channel("New York", "https://video3.earthcam.com/fecnetwork/4017timessquare.flv/playlist.m3u8", require("./assets/music/LASERS_Amsterdam.mp3")),
+    // new Channel("Austin", "https://video3.earthcam.com/fecnetwork/paradiseon6.flv/playlist.m3u8"),
+    // new Channel("Doha", "https://video3.earthcam.com/fecnetwork/7947.flv/playlist.m3u8"),
+    // new Channel("Las Vegas", "https://video3.earthcam.com/fecnetwork/eclasvegas.flv/playlist.m3u8"),
+    // new Channel("Columbus", "https://video3.earthcam.com/fecnetwork/6427.flv/playlist.m3u8"),
+    // new Channel("Belmont", "https://video3.earthcam.com/fecnetwork/5324.flv/playlist.m3u8"),
+    // new Channel("San Francisco", "https://video3.earthcam.com/fecnetwork/6961.flv/playlist.m3u8"),
   ];
 
   bands: Band[] = [
-    new Band(0, 31, 900),
-    new Band(32, 63, 800),
-    new Band(64, 95, 700),
-    new Band(96, 127, 600),
-    new Band(128, 159, 500),
-    new Band(160, 191, 400),
-    new Band(192, 255, 300),
-    new Band(256, 511, 200),
-    new Band(512, 1023, 100)
+    new Band(32, 63, 400),
+    new Band(72, 196, 300),
+    // new Band(256, 511, 200),
+    // new Band(512, 1023, 100)
   ];
 
   updateCurrentAmplitudes = (): void => {
@@ -248,18 +248,36 @@ export default class AppComponent {
   }
 
   updateFont = (): void => {
-    let max = _.max(this.amplitudeDeltas);
+    // let max = _.max(this.amplitudeDeltas);
+    //
+    // for (let bandIndex = 0; bandIndex < this.bands.length; bandIndex++) {
+    //   let delta = this.amplitudeDeltas[bandIndex];
+    //   let band = this.bands[bandIndex];
+    //
+    //   if (delta == max) {
+    //     // this.fontWeight = band.fontWeight;
+    //   }
+    // }
 
-    for (let bandIndex = 0; bandIndex < this.bands.length; bandIndex++) {
-      let delta = this.amplitudeDeltas[bandIndex];
-      let band = this.bands[bandIndex];
+    const minFontWeight = 100;
+    const maxFontWeight = 800;
+    const realMaxAmpValue = 150;
+    let amp2InWidth = 100 * Math.ceil(maxFontWeight * this.amplitudes[1] / realMaxAmpValue / 100);
 
-      if (delta == max) {
-        this.fontWeight = band.fontWeight;
-      }
-    }
+    if (amp2InWidth < minFontWeight)
+      amp2InWidth = minFontWeight;
 
-    if (this.amplitudeDeltas[2] < 0)
+    if (amp2InWidth > maxFontWeight)
+      amp2InWidth = maxFontWeight;
+
+    // console.log("amp2: " + amp2InWidth);
+    this.fontWeight = amp2InWidth;
+
+
+    let italyAmp = this.amplitudes[0] / 200;
+    // console.log("italyAmp: " + italyAmp);
+
+    if (italyAmp > 0.6)
       this.fontStyle = 'italic';
     else
       this.fontStyle = 'normal';
@@ -282,7 +300,11 @@ export default class AppComponent {
 
   setChannel = (channel: Channel): void => {
     //скроем эквалайзер
-    this.canvas.style.setProperty("display", "none");
+    // this.canvas.style.setProperty("display", "none");
+
+    this.audioElement.src = channel.music;
+    this.audioElement.play();
+    this.audioElement.currentTime = 20;
 
     this.player.stop();
     this.updateTextAndStyle(channel);
@@ -321,24 +343,26 @@ export default class AppComponent {
 
     this.analyser.getByteFrequencyData(this.dataArray);
 
-    this.canvasCtx.fillStyle = 'rgba(255, 255, 255 , 1)';
+    this.canvasCtx.fillStyle = 'rgba(0, 255, 255 , 1)';
     this.canvasCtx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
     this.updateCurrentAmplitudes();
-    this.updateAverrageAndDelta();
-    this.updateStat();
+    // this.updateAverrageAndDelta();
+    // this.updateStat();
+
+    this.updateFont();
 
     this.drawRawGraphic(this.canvasCtx);
-    // this.drawAmplitudes(this.amplitudes, this.canvasCtx, 'rgb(255, 0, 0)')
-    // this.drawAmplitudes(this.averrageAmplitudes, this.canvasCtx, 'rgb(0, 255, 0)')
+    this.drawAmplitudes(this.amplitudes, this.canvasCtx, 'rgb(255, 0, 0)')
+    this.drawAmplitudes(this.averrageAmplitudes, this.canvasCtx, 'rgb(0, 255, 0)')
   };
 
   drawRawGraphic = (canvasCtx: CanvasRenderingContext2D): void => {
     canvasCtx.lineWidth = 2;
-    canvasCtx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+    canvasCtx.strokeStyle = 'rgba(255, 255, 255, 1)';
     canvasCtx.beginPath();
 
-    let sliceWidth = this.canvas.width * 2.0 / this.bufferLength;
+    let sliceWidth = this.canvas.width / this.bufferLength;
     let canvas = canvasCtx.canvas;
 
     var x = 0;
@@ -355,8 +379,11 @@ export default class AppComponent {
   }
 
   drawAmplitudes = (dataAmp: number[], canvasCtx: CanvasRenderingContext2D, color: string): void => {
+    if (dataAmp === undefined || dataAmp.length === 0)
+      return;
+
     let canvas = canvasCtx.canvas;
-    let sliceWidth = this.canvas.width * 2.0 / this.bufferLength;
+    let sliceWidth = this.canvas.width / this.bufferLength;
 
     canvasCtx.lineWidth = 1;
     canvasCtx.strokeStyle = color;
@@ -373,7 +400,7 @@ export default class AppComponent {
       canvasCtx.moveTo(xMin, y);
       canvasCtx.lineTo(xMax, y);
     }
-    this.canvasCtx.lineTo(canvas.width, 0);
+    // this.canvasCtx.lineTo(canvas.width, 0);
     this.canvasCtx.stroke();
   }
 

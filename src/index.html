@@ -30,7 +30,7 @@
       /*background-color: red;*/
     }
 
-    a svg{
+    a svg {
       -moz-transition: fill .2s ease-in;
       -o-transition: fill .2s ease-in;
       -webkit-transition: fill .2s ease-in;
@@ -92,7 +92,7 @@
       position: fixed;
       /*bottom: 0;*/
       left: 0;
-      /*z-index: 1001;*/
+      z-index: 1001;
       mix-blend-mode: exclusion;
       /*width: 170vw;
       height: 40vh;*/
@@ -118,7 +118,7 @@
     .about-window {
       z-index: 1010;
       /*background-color: red;*/
-      background-color: rgba(0, 0, 0, 0.8);
+      background-color: rgba(0, 0, 0, 0.6);
       position: fixed;
       padding: 80pt;
       /*padding-bottom: 60pt;*/
@@ -348,7 +348,9 @@
 
   <div id="live"></div>
 
-  <canvas id="oscilloscope" width="1200" height="600"></canvas>
+  <audio id="audio-player"></audio>
+
+  <canvas id="oscilloscope" height="600"></canvas>
   <script type="text/javascript" data-pace-options='{ "ajax": false, "eventLag": false }' src="./pace.min.js"></script>
 </body>
 
